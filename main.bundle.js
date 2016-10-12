@@ -42,18 +42,68 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var canvas = document.getElementById('game');
+	var context = canvas.getContext('2d');
+
+	var getClickPosition = __webpack_require__(1);
+	var Bullet = __webpack_require__(2);
+
+	var bullets = [];
+
+	canvas.addEventListener('click', function (target) {
+	  var click = getClickPosition(target);
+	  bullets.push(new Bullet(click.x, click.y, 4, 20, 20));
+	});
+
+	requestAnimationFrame(function gameLoop() {
+	  context.clearRect(0, 0, canvas.width, canvas.height);
+	  bullets.forEach(function (bullet) {
+	    bullet.draw().move();
+	  });
+	  requestAnimationFrame(gameLoop);
+	});
+
+/***/ },
+/* 1 */
+/***/ function(module, exports) {
+
+	function getClickPosition(e) {
+	  function getPosition(element) {
+	    var xPosition = 0;
+	    var yPosition = 0;
+
+	    while (element) {
+	      xPosition += element.offsetLeft - element.scrollLeft + element.clientLeft;
+	      yPosition += element.offsetTop - element.scrollTop + element.clientTop;
+	      element = element.offsetParent;
+	    }
+
+	    return { x: xPosition, y: yPosition };
+	  }
+
+	  var parentPosition = getPosition(e.currentTarget);
+	  var xPosition = e.clientX - parentPosition.x;
+	  var yPosition = e.clientY - parentPosition.y;
+
+	  return { x: xPosition, y: yPosition };
+	}
+
+	module.exports = getClickPosition;
+
+/***/ },
+/* 2 */
 /***/ function(module, exports) {
 
 	var canvas = document.getElementById('game');
 	var context = canvas.getContext('2d');
 
-	var bullets = [];
-
 	function Bullet(x, y, radius, speedX, speedY) {
 	  this.x = x;
 	  this.y = y;
-	  this.height = 5;
-	  this.width = 5;
+	  this.height = 3;
+	  this.width = 3;
 	  this.radius = radius;
 	  this.speedX = speedX;
 	  this.speedY = speedY;
@@ -62,6 +112,7 @@
 	Bullet.prototype.draw = function () {
 	  context.beginPath();
 	  context.arc(this.x, this.y, this.radius, 2 * Math.PI, false);
+	  context.fillStyle = "#000000";
 	  context.fill();
 	  return this;
 	};
@@ -85,18 +136,7 @@
 	  return this;
 	};
 
-	canvas.addEventListener('click', function (target) {
-	  var click = getClickPosition(target);
-	  bullets.push(new Bullet(click.x, click.y, 5, 10, 10));
-	});
-
-	requestAnimationFrame(function gameLoop() {
-	  context.clearRect(0, 0, canvas.width, canvas.height);
-	  bullets.forEach(function (bullet) {
-	    bullet.draw().move();
-	  });
-	  requestAnimationFrame(gameLoop);
-	});
+	module.exports = Bullet;
 
 /***/ }
 /******/ ]);
