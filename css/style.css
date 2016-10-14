@@ -1,0 +1,10 @@
+.game-canvas {
+  background-color: rgba(165, 88, 74, .5);
+  background-position: center;
+  border: 1px solid;
+  display: block;
+  margin: auto;
+}
+body {
+  background-color: black;
+}
