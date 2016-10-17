@@ -3,7 +3,7 @@ body {
 }
 
 .game-canvas {
-  background-color: rgba(165, 88, 74, .75);
+  background-image: url('http://cdn.wallpapersafari.com/61/65/Qxg7dp.jpg');
   border: 2px solid;
   border-color: white;
   display: block;
