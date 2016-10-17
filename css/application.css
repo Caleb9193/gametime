@@ -3,7 +3,7 @@ body {
 }
 
 .game-canvas {
-  background-color: rgba(165, 88, 74, .95);
+  background-color: rgba(165, 88, 74, .75);
   border: 2px solid;
   border-color: white;
   display: block;
