@@ -1,0 +1,11 @@
+body {
+  background-color: rgba(30, 30, 60, 1);
+}
+
+.game-canvas {
+  background-color: rgba(165, 88, 74, .95);
+  border: 2px solid;
+  border-color: white;
+  display: block;
+  margin: auto;
+}
