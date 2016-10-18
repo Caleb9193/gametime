@@ -1,11 +1,14 @@
 body {
-  background-color: rgba(30, 30, 60, 1);
+  background-image: url('http://i.imgur.com/CAbj8La.jpg');
+  background-attachment: fixed;
+  background-size: cover;
 }
 
 .game-canvas {
-  background-color: black;
+  background-color: rgba(0, 0, 0, 0.8);
   border: 2px solid;
   border-color: white;
   display: block;
   margin: auto;
+  margin-top: 5%;
 }
