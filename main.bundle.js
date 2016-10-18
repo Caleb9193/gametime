@@ -51,17 +51,24 @@
 	var Bullet = __webpack_require__(2);
 	var Shooter = __webpack_require__(3);
 	var shooter = new Shooter(context);
-	var LevelOne = __webpack_require__(4);
-	var LevelTwo = __webpack_require__(7);
+	var Scoreboard = __webpack_require__(4);
+	var level = 1;
+	var scoreboard = new Scoreboard(context, level);
+	var LevelOne = __webpack_require__(5);
+	var LevelTwo = __webpack_require__(8);
+	var LevelThree = __webpack_require__(9);
 
 	var bullets = [];
-	var ammo = 5;
-	var level = 1;
 
-	if (level === 1) {
+	if (scoreboard.level === 1) {
 	  var currentLevel = new LevelOne(context);
-	} else if (level === 2) {
-	  var currentLevel = new LevelTwo(context);
+	}
+	function checkLevel() {
+	  if (scoreboard.level === 2) {
+	    currentLevel = new LevelTwo(context);
+	  } else if (scoreboard.level === 3) {
+	    currentLevel = new LevelThree(context);
+	  }
 	}
 
 	canvas.addEventListener('click', function (target) {
@@ -70,15 +77,16 @@
 	  var directionX = Math.cos(angleRadians) * 14;
 	  var directionY = Math.sin(angleRadians) * 14;
 
-	  if (bullets.length === 0 && ammo > 0) {
+	  if (currentLevel.ammo > 0 && scoreboard.targetsLeft > 0) {
 	    bullets.push(new Bullet(directionX, directionY, context));
-	    ammo--;
+	    currentLevel.ammo--;
 	  }
 	});
 
 	requestAnimationFrame(function gameLoop() {
 	  context.clearRect(0, 0, canvas.width, canvas.height);
 	  shooter.draw();
+	  scoreboard.draw(currentLevel, bullets);
 	  currentLevel.draw();
 	  bullets.forEach(function (bullet) {
 	    if (bullet.bounceCount < 8) {
@@ -87,8 +95,15 @@
 	      bullets.shift();
 	    }
 	  });
-
-	  requestAnimationFrame(gameLoop);
+	  if (scoreboard.targetsLeft === 0) {
+	    bullets = [];
+	    checkLevel();
+	    setTimeout(function () {
+	      requestAnimationFrame(gameLoop);
+	    }, 3000);
+	  } else {
+	    requestAnimationFrame(gameLoop);
+	  }
 	});
 
 /***/ },
@@ -243,10 +258,88 @@
 
 /***/ },
 /* 4 */
+/***/ function(module, exports) {
+
+	function Scoreboard(context, level) {
+	  this.targetsLeft = 0;
+	  this.context = context;
+	  this.level = level;
+	}
+
+	Scoreboard.prototype.draw = function (currentLevel, bullets) {
+	  this.score(currentLevel);
+	  this.getText(currentLevel, bullets);
+	};
+
+	Scoreboard.prototype.score = function (currentLevel) {
+	  var killCount = 0;
+
+	  currentLevel.targets.forEach(function (target) {
+	    if (!target.display) {
+	      killCount++;
+	    }
+	  });
+
+	  this.targetsLeft = currentLevel.targets.length - killCount;
+	};
+
+	Scoreboard.prototype.getText = function (currentLevel, bullets) {
+	  if (this.targetsLeft === 0) {
+	    // if game won
+	    gameWinText(currentLevel, this);
+	    this.level += 1;
+	  } else if (currentLevel.ammo === 0 && bullets.length === 0) {
+	    // if game lost
+	    gameLoseText(currentLevel, this);
+	  } else {
+	    // if game in progress
+	    gameText(currentLevel, this);
+	  }
+
+	  return this;
+	};
+
+	function gameWinText(currentLevel, that) {
+	  that.context.font = "35px Verdana";
+	  that.context.fillStyle = "white";
+	  that.context.textAlign = "center";
+	  that.context.fillText("Score: " + (100 + currentLevel.ammo * 100), that.context.canvas.width / 2, 60);
+
+	  return that;
+	}
+
+	function gameLoseText(currentLevel, that) {
+	  that.context.font = "40px Verdana";
+	  that.context.fillStyle = "#6b111b";
+	  that.context.textAlign = "center";
+	  that.context.fillText("YOU RAN OUT OF AMMO. PLEASE TRY AGAIN.", that.context.canvas.width / 2, 60);
+
+	  return that;
+	}
+
+	function gameText(currentLevel, that) {
+	  that.context.font = "14px Verdana";
+	  that.context.fillStyle = "white";
+	  that.context.beginPath();
+	  that.context.textAlign = "left";
+	  that.context.fillText("Targets Remaining: " + that.targetsLeft, 10, 20);
+	  that.context.closePath();
+
+	  that.context.beginPath();
+	  that.context.textAlign = "right";
+	  that.context.fillText("Shots Remaining: " + currentLevel.ammo, 1090, 20);
+
+	  return that;
+	}
+
+	module.exports = Scoreboard;
+
+/***/ },
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Obstacle = __webpack_require__(5);
-	var Target = __webpack_require__(6);
+	var Obstacle = __webpack_require__(6);
+	var Target = __webpack_require__(7);
 
 	function LevelOne(context) {
 	  var obstacleMidVert = new Obstacle(350, 100, 20, 200, context);
@@ -257,7 +350,7 @@
 	  var targetLeft = new Target(0, 150, context);
 	  var targetMid = new Target(650, 150, context);
 	  this.context = context;
-	  this.score = 0;
+	  this.ammo = 5;
 	  this.targets = [targetRight, targetLeft, targetMid];
 	  this.obstacles = [obstacleMidVert, obstacleMidHoriz, obstacleEdgeVert, obstacleEdgeHoriz];
 	}
@@ -274,7 +367,7 @@
 	module.exports = LevelOne;
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	function Obstacle(x, y, width, height, context) {
@@ -294,7 +387,7 @@
 	module.exports = Obstacle;
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
 	function Target(x, y, context) {
@@ -317,11 +410,11 @@
 	module.exports = Target;
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Obstacle = __webpack_require__(5);
-	var Target = __webpack_require__(6);
+	var Obstacle = __webpack_require__(6);
+	var Target = __webpack_require__(7);
 
 	function LevelTwo(context) {
 	  var obstacleRightVert = new Obstacle(955, 370, 20, 30, context);
@@ -333,7 +426,7 @@
 	  var targetLeft = new Target(0, 150, context);
 	  var targetMid = new Target(900, 350, context);
 	  this.context = context;
-	  this.score = 0;
+	  this.ammo = 5;
 	  this.targets = [targetRight, targetLeft, targetMid];
 	  this.obstacles = [obstacleRightVert, obstacleRightHighHoriz, obstacleEdgeVert, obstacleEdgeHoriz, obstacleRightLowHoriz];
 	}
@@ -348,6 +441,39 @@
 	};
 
 	module.exports = LevelTwo;
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Obstacle = __webpack_require__(6);
+	var Target = __webpack_require__(7);
+
+	function LevelThree(context) {
+	  var obstacleRightVert = new Obstacle(955, 370, 20, 30, context);
+	  var obstacleRightHighHoriz = new Obstacle(875, 300, 50, 20, context);
+	  var obstacleRightLowHoriz = new Obstacle(875, 400, 100, 20, context);
+	  var obstacleEdgeVert = new Obstacle(850, 300, 25, 200, context);
+	  var obstacleEdgeHoriz = new Obstacle(0, 200, 200, 15, context);
+	  var targetRight = new Target(855, 250, context);
+	  var targetLeft = new Target(0, 150, context);
+	  var targetMid = new Target(900, 350, context);
+	  this.context = context;
+	  this.ammo = 5;
+	  this.targets = [targetRight, targetLeft, targetMid];
+	  this.obstacles = [obstacleRightVert, obstacleRightHighHoriz, obstacleEdgeVert, obstacleEdgeHoriz, obstacleRightLowHoriz];
+	}
+
+	LevelThree.prototype.draw = function () {
+	  this.obstacles.forEach(function (obstacle) {
+	    obstacle.draw();
+	  });
+	  this.targets.forEach(function (target) {
+	    target.draw();
+	  });
+	};
+
+	module.exports = LevelThree;
 
 /***/ }
 /******/ ]);
