@@ -342,17 +342,12 @@
 	var Target = __webpack_require__(7);
 
 	function LevelOne(context) {
-	  var obstacleMidVert = new Obstacle(350, 100, 20, 200, context);
 	  var obstacleMidHoriz = new Obstacle(550, 200, 200, 15, context);
-	  var obstacleEdgeVert = new Obstacle(850, 300, 25, 200, context);
-	  var obstacleEdgeHoriz = new Obstacle(0, 200, 200, 15, context);
-	  var targetRight = new Target(855, 250, context);
-	  var targetLeft = new Target(0, 150, context);
 	  var targetMid = new Target(650, 150, context);
 	  this.context = context;
 	  this.ammo = 5;
-	  this.targets = [targetRight, targetLeft, targetMid];
-	  this.obstacles = [obstacleMidVert, obstacleMidHoriz, obstacleEdgeVert, obstacleEdgeHoriz];
+	  this.targets = [targetMid];
+	  this.obstacles = [obstacleMidHoriz];
 	}
 
 	LevelOne.prototype.draw = function () {
@@ -417,18 +412,17 @@
 	var Target = __webpack_require__(7);
 
 	function LevelTwo(context) {
-	  var obstacleRightVert = new Obstacle(955, 370, 20, 30, context);
-	  var obstacleRightHighHoriz = new Obstacle(875, 300, 50, 20, context);
-	  var obstacleRightLowHoriz = new Obstacle(875, 400, 100, 20, context);
+	  var obstacleMidVert = new Obstacle(350, 100, 20, 200, context);
+	  var obstacleMidHoriz = new Obstacle(550, 200, 200, 15, context);
 	  var obstacleEdgeVert = new Obstacle(850, 300, 25, 200, context);
 	  var obstacleEdgeHoriz = new Obstacle(0, 200, 200, 15, context);
 	  var targetRight = new Target(855, 250, context);
 	  var targetLeft = new Target(0, 150, context);
-	  var targetMid = new Target(900, 350, context);
+	  var targetMid = new Target(650, 150, context);
 	  this.context = context;
 	  this.ammo = 5;
-	  this.targets = [targetRight, targetLeft, targetMid];
-	  this.obstacles = [obstacleRightVert, obstacleRightHighHoriz, obstacleEdgeVert, obstacleEdgeHoriz, obstacleRightLowHoriz];
+	  this.targets = [targetMid, targetRight, targetLeft];
+	  this.obstacles = [obstacleMidHoriz, obstacleMidVert, obstacleEdgeVert, obstacleEdgeHoriz];
 	}
 
 	LevelTwo.prototype.draw = function () {
