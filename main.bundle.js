@@ -63,9 +63,9 @@
 
 	canvas.addEventListener('click', function (target) {
 	  var click = getClickPosition(target);
-	  var angleRadians = Math.atan2(click.y - 450, click.x - 70);
-	  var directionX = Math.cos(angleRadians) * 13;
-	  var directionY = Math.sin(angleRadians) * 13;
+	  var angleRadians = Math.atan2(click.y - 470, click.x - 80);
+	  var directionX = Math.cos(angleRadians) * 14;
+	  var directionY = Math.sin(angleRadians) * 14;
 
 	  if (bullets.length === 0 && ammo > 0) {
 	    bullets.push(new Bullet(directionX, directionY, context));
