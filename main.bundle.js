@@ -52,6 +52,7 @@
 	var Shooter = __webpack_require__(3);
 	var shooter = new Shooter(context);
 	var LevelOne = __webpack_require__(4);
+	var LevelTwo = __webpack_require__(7);
 
 	var bullets = [];
 	var ammo = 5;
@@ -59,6 +60,8 @@
 
 	if (level === 1) {
 	  var currentLevel = new LevelOne(context);
+	} else if (level === 2) {
+	  var currentLevel = new LevelTwo(context);
 	}
 
 	canvas.addEventListener('click', function (target) {
@@ -312,6 +315,39 @@
 	};
 
 	module.exports = Target;
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Obstacle = __webpack_require__(5);
+	var Target = __webpack_require__(6);
+
+	function LevelTwo(context) {
+	  var obstacleRightVert = new Obstacle(955, 370, 20, 30, context);
+	  var obstacleRightHighHoriz = new Obstacle(875, 300, 50, 20, context);
+	  var obstacleRightLowHoriz = new Obstacle(875, 400, 100, 20, context);
+	  var obstacleEdgeVert = new Obstacle(850, 300, 25, 200, context);
+	  var obstacleEdgeHoriz = new Obstacle(0, 200, 200, 15, context);
+	  var targetRight = new Target(855, 250, context);
+	  var targetLeft = new Target(0, 150, context);
+	  var targetMid = new Target(900, 350, context);
+	  this.context = context;
+	  this.score = 0;
+	  this.targets = [targetRight, targetLeft, targetMid];
+	  this.obstacles = [obstacleRightVert, obstacleRightHighHoriz, obstacleEdgeVert, obstacleEdgeHoriz, obstacleRightLowHoriz];
+	}
+
+	LevelTwo.prototype.draw = function () {
+	  this.obstacles.forEach(function (obstacle) {
+	    obstacle.draw();
+	  });
+	  this.targets.forEach(function (target) {
+	    target.draw();
+	  });
+	};
+
+	module.exports = LevelTwo;
 
 /***/ }
 /******/ ]);
