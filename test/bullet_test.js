@@ -3,8 +3,7 @@ const assert = chai.assert;
 const stub = require('./support/stub');
 
 const Bullet = require('../lib/bullet');
-const Obstacle = require('../lib/obstacle');
-const Target = require('../lib/target');
+const LevelOne = require('../lib/level_one');
 
 describe('Bullet', function(){
   context('default attributes', function(){
@@ -19,11 +18,11 @@ describe('Bullet', function(){
     });
 
     it('has a default y-coordinate', function(){
-      assert.equal(bullet.y, 450);
+      assert.equal(bullet.y, 470);
     });
 
     it('has a default x-coordinate', function(){
-      assert.equal(bullet.x, 75);
+      assert.equal(bullet.x, 80);
     });
 
     it('has a default radius', function(){
@@ -54,43 +53,53 @@ describe('Bullet', function(){
       assert.equal(bullet.directionY, 20);
     });
   });
-});
+  describe('draw', function(){
+    var context = stub().of("beginPath").of("arc").of("fill");
+    var directionX = 15;
+    var directionY = 20;
+    var bullet = new Bullet(directionX, directionY, context);
 
-describe('draw', function(){
-  var context = stub().of("beginPath").of("arc").of("fill");
-  var directionX = 15;
-  var directionY = 20;
-  var bullet = new Bullet(directionX, directionY, context);
+    it('should call arc on the canvas', function(){
+      bullet.draw();
+      assert.equal(context.arc.calls.length, 1);
+    });
 
-  it('should call arc on the canvas', function(){
-    bullet.draw();
-    assert.equal(context.arc.calls.length, 1);
+    it('should pass x-coordinate, y-coordinate, and radius to arc', function(){
+      bullet.draw();
+      assert.equal(context.arc.calls[0][0], bullet.x);
+      assert.equal(context.arc.calls[0][1], bullet.y);
+      assert.equal(context.arc.calls[0][2], bullet.radius);
+    });
   });
 
-  it('should pass x-coordinate, y-coordinate, and radius to arc', function(){
-    bullet.draw();
-    assert.equal(context.arc.calls[0][0], bullet.x);
-    assert.equal(context.arc.calls[0][1], bullet.y);
-    assert.equal(context.arc.calls[0][2], bullet.radius);
-  });
-});
-
-describe('move', function(){
-  var context = stub().of("canvas").of("beginPath").of("arc").of("fill");
-  var directionX = 15;
-  var directionY = 20;
-  var bullet = new Bullet(directionX, directionY, context);
-  var obstacles = [new Obstacle(0, 250, 10, 300, context)];
-  var targets = [new Target(1093, 100, 7, 50, context)];
+  describe('move', function(){
+    var context = stub().of("canvas").of("beginPath").of("arc").of("fill");
+    var directionX = 15;
+    var directionY = 20;
+    var bullet = new Bullet(directionX, directionY, context);
+    var level = new LevelOne(context);
 
 
-  it('should increment the x coordinate by directionX', function(){
-    bullet.move(obstacles, targets);
-    assert.equal(bullet.x, 90);
+    it('should increment the x coordinate by directionX', function(){
+      bullet.move(level);
+      assert.equal(bullet.x, 95);
+    });
+
+    it('should increment the y coordinate by directionY', function(){
+      bullet.move(level);
+      assert.equal(bullet.y, 510);
+    });
   });
 
-  it('should increment the y coordinate by directionY', function(){
-    bullet.move(obstacles, targets);
-    assert.equal(bullet.y, 490);
+  describe('collisionCheck', function(){
+    var context = stub().of("canvas").of("beginPath").of("arc").of("fill");
+    var directionX = 15;
+    var directionY = 20;
+    var bullet = new Bullet(directionX, directionY, context);
+    var level = new LevelOne(context);
+
+    it('should be a function', function(){
+      assert.isDefined(bullet.collisionCheck(level.obstacles, level.targets));
+    });
   });
 });
