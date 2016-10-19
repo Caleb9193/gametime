@@ -34,25 +34,3 @@ describe('Obstacle', function(){
     });
   });
 });
-
-describe('draw', function(){
-  var x = 20;
-  var y = 30;
-  var height = 40;
-  var width = 200;
-  var context = stub().of('fillRect').of('fillStyle');
-  var obstacle = new Obstacle(x, y, width, height, context);
-
-  it('should call fillRect on the canvas', function(){
-    obstacle.draw();
-    assert.equal(context.fillRect.calls.length, 1);
-  });
-
-  it('should pass x, y, width, and height to fillRect', function(){
-    obstacle.draw();
-    assert.equal(context.fillRect.calls[0][0], obstacle.x);
-    assert.equal(context.fillRect.calls[0][1], obstacle.y);
-    assert.equal(context.fillRect.calls[0][2], obstacle.width);
-    assert.equal(context.fillRect.calls[0][3], obstacle.height);
-  });
-});
