@@ -116,6 +116,10 @@
 
 	function checkScores() {
 	  var scores = localStorage.scores.split(',').splice(1).sort().reverse();
+	  if (scores.length < 3) {
+	    scores[1] = '';
+	    scores[2] = '';
+	  }
 
 	  if (localStorage.scores !== '') {
 	    for (var i = 0; i <= 2; i++) {
