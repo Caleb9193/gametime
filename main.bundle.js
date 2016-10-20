@@ -53,10 +53,12 @@
 	var Bullet = __webpack_require__(13);
 
 	$(document).ready(function () {
-	  let scores = localStorage.scores.split(',').splice(1).sort().reverse();
+	  var scores = localStorage.scores.split(',').splice(1).sort().reverse();
+
 	  for (var i = 0; i <= 2; i++) {
 	    $('#scores').append('<li class="score">' + scores[i] + '</li>');
 	  }
+
 	  $('#start-game-btn').on('click', function () {
 	    $('#welcome').hide();
 	    $('#instructions').css('display', 'block');
