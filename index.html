@@ -1,17 +1,33 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Game Time</title>
-  <link href="css/application.css" rel="stylesheet">
-</head>
-<body>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ricochet</title>
+    <link href="assets/css/application.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Orbitron:700" rel="stylesheet">
+  </head>
+  <body>
 
-  <canvas id="game"
-          class="game-canvas"
-          width="1100px"
-          height="500px"></canvas>
+    <canvas id="game"
+            class="game-canvas"
+            width="1100px"
+            height="500px"></canvas>
 
-  <script src="main.bundle.js"></script>
-</body>
+    <div id="welcome" class="well">
+      <center>
+        <div>
+          <h2>Welcome to</h2>
+          <h1><em>RICOCHET</em></h1>
+        </div>
+
+        <div>
+          <button type="button" id="start-game-btn">Start Game</button>
+        </div>
+      </center>
+    </div>
+
+    <script src="main.bundle.js"></script>
+  </body>
 </html>

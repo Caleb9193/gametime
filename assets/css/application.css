@@ -1,0 +1,42 @@
+body {
+  background-image: url('http://i.imgur.com/CAbj8La.jpg');
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+.game-canvas {
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 2px solid;
+  border-color: white;
+  display: block;
+  margin: auto;
+  margin-top: 5%;
+}
+
+.well {
+  background-color: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: white;
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  margin-left: 15%;
+  margin-right: 15%;
+  margin-top: 5%;
+  padding-bottom: 5px;
+  padding-top: 5px;
+}
+
+h1 {
+  font-size: 300%;
+}
+
+#start-game-btn {
+  background-color: #21d141;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
+  margin-top: 24px;
+}
