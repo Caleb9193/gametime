@@ -8,7 +8,7 @@ body {
   background-color: rgba(0, 0, 0, 0.8);
   border: 2px solid;
   border-color: white;
-  display: block;
+  display: none;
   margin: auto;
   margin-top: 5%;
 }
@@ -26,11 +26,22 @@ body {
   padding-top: 5px;
 }
 
+#scoreboard {
+  background-color: rgba(0, 0, 0, 0.75);
+  border-radius: 5px;
+  display: none;
+  margin-left: 30%;
+  margin-right: 30%;
+  margin-top: 5px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+}
+
 h1 {
   font-size: 300%;
 }
 
-#start-game-btn {
+button {
   background-color: #21d141;
   border: none;
   border-radius: 5px;
@@ -38,5 +49,8 @@ h1 {
   text-align: center;
   font-weight: bold;
   font-size: 18px;
+}
+
+#start-gama-btn {
   margin-top: 24px;
 }
