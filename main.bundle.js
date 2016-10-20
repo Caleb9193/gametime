@@ -83,7 +83,7 @@
 	        bullet.draw(game).move(game.currentLevel);
 	      });
 	      if (game.gameOver) {
-	        $('#scoreboard').css('display', 'block');
+	        $('#restart-game').css('display', 'block');
 	      } else if (game.levelLost) {
 	        game.retryLevel();
 	        setTimeout(function () {
@@ -2216,7 +2216,7 @@
 	      this.calculateScores(game.currentLevel.remainingAmmo);
 	      gameWinText(this);
 	      localStorage.scores = localStorage.scores + ',' + this.gameScore.toString();
-	      game.levelWon = true;
+	      game.gameOver = true;
 	      break;
 	    case 2:
 	      // if level only won
