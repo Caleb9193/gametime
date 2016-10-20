@@ -45,14 +45,70 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(1);
-	__webpack_require__(3);
-
-	$('.game-canvas').hide();
+	var canvas = document.getElementById('game');
+	var context = canvas.getContext('2d');
+	var getClickPosition = __webpack_require__(3);
+	var Game = __webpack_require__(4);
+	var Shooter = __webpack_require__(12);
+	var Bullet = __webpack_require__(13);
 
 	$(document).ready(function () {
 	  $('#start-game-btn').on('click', function () {
 	    $('#welcome').hide();
-	    $('.game-canvas').show();
+	    $('#instructions').css('display', 'block');
+	    $('.game-canvas').css('display', 'block');
+	    var game = new Game(context);
+	    var shooter = new Shooter(context);
+
+	    requestAnimationFrame(startLoop);
+
+	    function startLoop() {
+	      shooter = new Shooter(context);
+	      game = new Game(context);
+	      requestAnimationFrame(gameLoop);
+	    }
+
+	    function gameLoop() {
+	      context.clearRect(0, 0, canvas.width, canvas.height);
+	      shooter.draw();
+	      game.scoreboard.draw(game);
+	      game.currentLevel.draw();
+	      game.bullets.forEach(function (bullet) {
+	        bullet.draw(game).move(game.currentLevel);
+	      });
+	      if (game.gameOver) {
+	        $('#scoreboard').css('display', 'block');
+	      } else if (game.levelLost) {
+	        game.retryLevel();
+	        setTimeout(function () {
+	          requestAnimationFrame(gameLoop);
+	        }, 3000);
+	      } else if (game.levelWon) {
+	        game.updateLevel();
+	        setTimeout(function () {
+	          requestAnimationFrame(gameLoop);
+	        }, 3000);
+	      } else {
+	        requestAnimationFrame(gameLoop);
+	      }
+	    }
+
+	    canvas.addEventListener('click', function (target) {
+	      var click = getClickPosition(target);
+	      var angleRadians = Math.atan2(click.y - 470, click.x - 80);
+	      var directionX = Math.cos(angleRadians) * 14;
+	      var directionY = Math.sin(angleRadians) * 14;
+
+	      if (game.currentLevel.remainingAmmo > 0) {
+	        game.bullets.push(new Bullet(directionX, directionY, context));
+	        game.currentLevel.remainingAmmo--;
+	      }
+	    });
+
+	    $('#restart-game-btn').on('click', function () {
+	      $('#scoreboard').hide();
+	      requestAnimationFrame(startLoop);
+	    });
 	  });
 	});
 
@@ -2047,72 +2103,6 @@
 
 /***/ },
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var canvas = document.getElementById('game');
-	var context = canvas.getContext('2d');
-
-	var getClickPosition = __webpack_require__(4);
-	var Bullet = __webpack_require__(5);
-	var Shooter = __webpack_require__(6);
-	var shooter = new Shooter(context);
-	var Scoreboard = __webpack_require__(7);
-	var level = 1;
-	var scoreboard = new Scoreboard(context, level);
-	var LevelOne = __webpack_require__(8);
-	var LevelTwo = __webpack_require__(11);
-	var LevelThree = __webpack_require__(12);
-
-	var bullets = [];
-
-	if (scoreboard.level === 1) {
-	  var currentLevel = new LevelOne(context);
-	}
-	function checkLevel() {
-	  if (scoreboard.level === 2) {
-	    currentLevel = new LevelTwo(context);
-	  } else if (scoreboard.level === 3) {
-	    currentLevel = new LevelThree(context);
-	  }
-	}
-
-	canvas.addEventListener('click', function (target) {
-	  var click = getClickPosition(target);
-	  var angleRadians = Math.atan2(click.y - 470, click.x - 80);
-	  var directionX = Math.cos(angleRadians) * 14;
-	  var directionY = Math.sin(angleRadians) * 14;
-
-	  if (currentLevel.ammo > 0 && scoreboard.targetsLeft > 0) {
-	    bullets.push(new Bullet(directionX, directionY, context));
-	    currentLevel.ammo--;
-	  }
-	});
-
-	requestAnimationFrame(function gameLoop() {
-	  context.clearRect(0, 0, canvas.width, canvas.height);
-	  shooter.draw();
-	  scoreboard.draw(currentLevel, bullets);
-	  currentLevel.draw();
-	  bullets.forEach(function (bullet) {
-	    if (bullet.bounceCount < 8) {
-	      bullet.draw().move(currentLevel);
-	    } else {
-	      bullets.shift();
-	    }
-	  });
-	  if (scoreboard.targetsLeft === 0) {
-	    bullets = [];
-	    checkLevel();
-	    setTimeout(function () {
-	      requestAnimationFrame(gameLoop);
-	    }, 3000);
-	  } else {
-	    requestAnimationFrame(gameLoop);
-	  }
-	});
-
-/***/ },
-/* 4 */
 /***/ function(module, exports) {
 
 	function getClickPosition(e) {
@@ -2139,7 +2129,335 @@
 	module.exports = getClickPosition;
 
 /***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Scoreboard = __webpack_require__(5);
+	var LevelOne = __webpack_require__(7);
+	var LevelTwo = __webpack_require__(10);
+	var LevelThree = __webpack_require__(11);
+
+	function Game(context) {
+	  this.currentLevel = new LevelOne(context);
+	  this.finalLevel = 3;
+	  this.scoreboard = new Scoreboard(context);
+	  this.bullets = [];
+	  this.levelWon = false;
+	  this.levelLost = false;
+	  this.gameOver = false;
+	  this.context = context;
+	}
+
+	Game.prototype.updateLevel = function () {
+	  if (this.currentLevel.number === 1) {
+	    this.currentLevel = new LevelTwo(this.context);
+	  } else if (this.currentLevel.number === 2) {
+	    this.currentLevel = new LevelThree(this.context);
+	  } else if (this.currentLevel.number === 3) {
+	    this.gameOver = true;
+	  }
+	  this.levelWon = false;
+	};
+
+	Game.prototype.retryLevel = function () {
+	  this.currentLevel.remainingAmmo = this.currentLevel.ammo;
+	  this.currentLevel.targets.forEach(function (target) {
+	    target.display = true;
+	  });
+	  this.levelLost = false;
+
+	  return this;
+	};
+
+	module.exports = Game;
+
+/***/ },
 /* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var checkLevel = __webpack_require__(6);
+
+	function Scoreboard(context) {
+	  this.targetsLeft = 0;
+	  this.levelScore = 0;
+	  this.gameScore = 0;
+	  this.context = context;
+	}
+
+	Scoreboard.prototype.draw = function (game) {
+	  this.trackTargets(game.currentLevel);
+	  this.score(game);
+	};
+
+	Scoreboard.prototype.trackTargets = function (currentLevel) {
+	  var count = 0;
+	  currentLevel.targets.forEach(function (target) {
+	    if (!target.display) {
+	      count++;
+	    }
+	  });
+
+	  this.targetsLeft = currentLevel.targets.length - count;
+	};
+
+	Scoreboard.prototype.score = function (game) {
+	  switch (checkLevel(game)) {
+	    case 1:
+	      // if level & game won
+	      this.calculateScores(game.currentLevel.remainingAmmo);
+	      gameWinText(this);
+	      game.levelWon = true;
+	      break;
+	    case 2:
+	      // if level only won
+	      this.calculateScores(game.currentLevel.remainingAmmo);
+	      levelWinText(this);
+	      game.levelWon = true;
+	      break;
+	    case 3:
+	      // if level lost
+	      levelLoseText(this);
+	      game.levelLost = true;
+	      break;
+	    default:
+	      // game is in progress
+	      gameText(game.currentLevel.remainingAmmo, this);
+	  }
+
+	  return this;
+	};
+
+	Scoreboard.prototype.calculateScores = function (ammo) {
+	  this.levelScore = 100 + ammo * 100;
+	  this.gameScore += this.levelScore;
+
+	  return this;
+	};
+
+	function gameWinText(scoreboard) {
+	  scoreboard.context.font = "35px Verdana";
+	  scoreboard.context.fillStyle = "white";
+	  scoreboard.context.textAlign = "center";
+	  scoreboard.context.fillText("Score: " + scoreboard.levelScore + " | Total Score: " + scoreboard.gameScore, scoreboard.context.canvas.width / 2, 60);
+
+	  return scoreboard;
+	}
+
+	function levelWinText(scoreboard) {
+	  scoreboard.context.font = "35px Verdana";
+	  scoreboard.context.fillStyle = "white";
+	  scoreboard.context.textAlign = "center";
+	  scoreboard.context.fillText("Score: " + scoreboard.levelScore, scoreboard.context.canvas.width / 2, 60);
+
+	  return scoreboard;
+	}
+
+	function levelLoseText(scoreboard) {
+	  scoreboard.context.font = "40px Verdana";
+	  scoreboard.context.fillStyle = "#6b111b";
+	  scoreboard.context.textAlign = "center";
+	  scoreboard.context.fillText("YOU RAN OUT OF AMMO. PLEASE TRY AGAIN.", scoreboard.context.canvas.width / 2, 60);
+
+	  return scoreboard;
+	}
+
+	function gameText(ammo, scoreboard) {
+	  scoreboard.context.font = "14px Verdana";
+	  scoreboard.context.fillStyle = "white";
+	  scoreboard.context.beginPath();
+	  scoreboard.context.textAlign = "left";
+	  scoreboard.context.fillText("Targets Remaining: " + scoreboard.targetsLeft, 10, 20);
+	  scoreboard.context.closePath();
+	  scoreboard.context.beginPath();
+	  scoreboard.context.textAlign = "right";
+	  scoreboard.context.fillText("Shots Remaining: " + ammo, 1090, 20);
+
+	  return scoreboard;
+	}
+
+	module.exports = Scoreboard;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	module.exports = function (game) {
+	  if (game.scoreboard.targetsLeft === 0 && game.currentLevel.number === game.finalLevel) {
+	    game.bullets = [];
+	    return 1;
+	  } else if (game.scoreboard.targetsLeft === 0) {
+	    game.bullets = [];
+	    return 2;
+	  } else if (game.currentLevel.remainingAmmo === 0 && game.bullets.length === 0) {
+	    return 3;
+	  }
+	};
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Obstacle = __webpack_require__(8);
+	var Target = __webpack_require__(9);
+
+	function LevelOne(context) {
+	  this.context = context;
+	  this.number = 1;
+	  this.ammo = 4;
+	  this.remainingAmmo = 4;
+	  this.targets = createTargets(context);
+	  this.obstacles = createObstacles(context);
+	}
+
+	LevelOne.prototype.draw = function () {
+	  this.obstacles.forEach(function (obstacle) {
+	    obstacle.draw();
+	  });
+	  this.targets.forEach(function (target) {
+	    target.draw();
+	  });
+	};
+
+	function createTargets(context) {
+	  return [new Target(650, 150, context)];
+	}
+	function createObstacles(context) {
+	  return [new Obstacle(550, 200, 200, 15, context)];
+	}
+
+	module.exports = LevelOne;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	function Obstacle(x, y, width, height, context) {
+	  this.x = x;
+	  this.y = y;
+	  this.width = width;
+	  this.height = height;
+	  this.context = context;
+	}
+
+	Obstacle.prototype.draw = function () {
+	  var img = new Image();
+	  img.src = 'http://bgfons.com/upload/brick_texture3348.jpg';
+	  this.context.drawImage(img, this.x, this.y, this.width, this.height);
+	};
+
+	module.exports = Obstacle;
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	function Target(x, y, context) {
+	  this.x = x;
+	  this.y = y;
+	  this.width = 17;
+	  this.height = 50;
+	  this.context = context;
+	  this.display = true;
+	}
+
+	Target.prototype.draw = function () {
+	  if (this.display) {
+	    var img = new Image();
+	    img.src = 'http://i.imgur.com/eWbMI9a.png';
+	    this.context.drawImage(img, this.x, this.y, this.width, this.height);
+	  }
+	};
+
+	module.exports = Target;
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Obstacle = __webpack_require__(8);
+	var Target = __webpack_require__(9);
+
+	function LevelTwo(context) {
+	  this.context = context;
+	  this.number = 2;
+	  this.ammo = 5;
+	  this.remainingAmmo = 5;
+	  this.targets = createTargets(context);
+	  this.obstacles = createObstacles(context);
+	}
+
+	function createObstacles(context) {
+	  return [new Obstacle(350, 100, 20, 200, context), new Obstacle(550, 200, 200, 15, context), new Obstacle(850, 300, 25, 200, context), new Obstacle(0, 200, 200, 15, context)];
+	}
+
+	function createTargets(context) {
+	  return [new Target(855, 250, context), new Target(0, 150, context), new Target(650, 150, context)];
+	}
+
+	LevelTwo.prototype.draw = function () {
+	  this.obstacles.forEach(function (obstacle) {
+	    obstacle.draw();
+	  });
+	  this.targets.forEach(function (target) {
+	    target.draw();
+	  });
+	};
+
+	module.exports = LevelTwo;
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Obstacle = __webpack_require__(8);
+	var Target = __webpack_require__(9);
+
+	function LevelThree(context) {
+	  var obstacleRightVert = new Obstacle(955, 370, 20, 30, context);
+	  var obstacleRightHighHoriz = new Obstacle(875, 300, 50, 20, context);
+	  var obstacleRightLowHoriz = new Obstacle(875, 400, 100, 20, context);
+	  var obstacleEdgeVert = new Obstacle(850, 300, 25, 200, context);
+	  var obstacleEdgeHoriz = new Obstacle(0, 200, 200, 15, context);
+	  var targetRight = new Target(855, 250, context);
+	  var targetLeft = new Target(0, 150, context);
+	  var targetMid = new Target(900, 350, context);
+	  this.context = context;
+	  this.number = 3;
+	  this.ammo = 6;
+	  this.remainingAmmo = 6;
+	  this.targets = [targetRight, targetLeft, targetMid];
+	  this.obstacles = [obstacleRightVert, obstacleRightHighHoriz, obstacleEdgeVert, obstacleEdgeHoriz, obstacleRightLowHoriz];
+	}
+
+	LevelThree.prototype.draw = function () {
+	  this.obstacles.forEach(function (obstacle) {
+	    obstacle.draw();
+	  });
+	  this.targets.forEach(function (target) {
+	    target.draw();
+	  });
+	};
+
+	module.exports = LevelThree;
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	function Shooter(context) {
+	  this.context = context;
+	}
+
+	Shooter.prototype.draw = function () {
+	  var img = new Image();
+	  img.src = 'http://i.imgur.com/sojxivK.png';
+	  this.context.drawImage(img, 70, 450);
+	};
+
+	module.exports = Shooter;
+
+/***/ },
+/* 13 */
 /***/ function(module, exports) {
 
 	function Bullet(directionX, directionY, context) {
@@ -2154,11 +2472,15 @@
 	  this.bounceCount = 0;
 	}
 
-	Bullet.prototype.draw = function () {
-	  this.context.beginPath();
-	  this.context.arc(this.x, this.y, this.radius, 2 * Math.PI, false);
-	  this.context.fillStyle = "#b5b5b5";
-	  this.context.fill();
+	Bullet.prototype.draw = function (game) {
+	  if (this.bounceCount < 8) {
+	    this.context.beginPath();
+	    this.context.arc(this.x, this.y, this.radius, 2 * Math.PI, false);
+	    this.context.fillStyle = "#b5b5b5";
+	    this.context.fill();
+	  } else {
+	    game.bullets.shift();
+	  }
 
 	  return this;
 	};
@@ -2237,241 +2559,6 @@
 	};
 
 	module.exports = Bullet;
-
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	function Shooter(context) {
-	  this.context = context;
-	}
-
-	Shooter.prototype.draw = function () {
-	  var img = new Image();
-	  img.src = 'http://i.imgur.com/sojxivK.png';
-	  this.context.drawImage(img, 70, 450);
-	};
-
-	module.exports = Shooter;
-
-/***/ },
-/* 7 */
-/***/ function(module, exports) {
-
-	function Scoreboard(context, level) {
-	  this.targetsLeft = 0;
-	  this.context = context;
-	  this.level = level;
-	}
-
-	Scoreboard.prototype.draw = function (currentLevel, bullets) {
-	  this.score(currentLevel);
-	  this.getText(currentLevel, bullets);
-	};
-
-	Scoreboard.prototype.score = function (currentLevel) {
-	  var killCount = 0;
-
-	  currentLevel.targets.forEach(function (target) {
-	    if (!target.display) {
-	      killCount++;
-	    }
-	  });
-
-	  this.targetsLeft = currentLevel.targets.length - killCount;
-	};
-
-	Scoreboard.prototype.getText = function (currentLevel, bullets) {
-	  if (this.targetsLeft === 0) {
-	    // if game won
-	    gameWinText(currentLevel, this);
-	    this.level += 1;
-	  } else if (currentLevel.ammo === 0 && bullets.length === 0) {
-	    // if game lost
-	    gameLoseText(currentLevel, this);
-	  } else {
-	    // if game in progress
-	    gameText(currentLevel, this);
-	  }
-
-	  return this;
-	};
-
-	function gameWinText(currentLevel, that) {
-	  that.context.font = "35px Verdana";
-	  that.context.fillStyle = "white";
-	  that.context.textAlign = "center";
-	  that.context.fillText("Score: " + (100 + currentLevel.ammo * 100), that.context.canvas.width / 2, 60);
-
-	  return that;
-	}
-
-	function gameLoseText(currentLevel, that) {
-	  that.context.font = "40px Verdana";
-	  that.context.fillStyle = "#6b111b";
-	  that.context.textAlign = "center";
-	  that.context.fillText("YOU RAN OUT OF AMMO. PLEASE TRY AGAIN.", that.context.canvas.width / 2, 60);
-
-	  return that;
-	}
-
-	function gameText(currentLevel, that) {
-	  that.context.font = "14px Verdana";
-	  that.context.fillStyle = "white";
-	  that.context.beginPath();
-	  that.context.textAlign = "left";
-	  that.context.fillText("Targets Remaining: " + that.targetsLeft, 10, 20);
-	  that.context.closePath();
-
-	  that.context.beginPath();
-	  that.context.textAlign = "right";
-	  that.context.fillText("Shots Remaining: " + currentLevel.ammo, 1090, 20);
-
-	  return that;
-	}
-
-	module.exports = Scoreboard;
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Obstacle = __webpack_require__(9);
-	var Target = __webpack_require__(10);
-
-	function LevelOne(context) {
-	  this.context = context;
-	  this.ammo = 5;
-	  this.targets = createTargets(context);
-	  this.obstacles = createObstacles(context);
-	}
-
-	LevelOne.prototype.draw = function () {
-	  this.obstacles.forEach(function (obstacle) {
-	    obstacle.draw();
-	  });
-	  this.targets.forEach(function (target) {
-	    target.draw();
-	  });
-	};
-
-	function createTargets(context) {
-	  return [new Target(650, 150, context)];
-	}
-	function createObstacles(context) {
-	  return [new Obstacle(550, 200, 200, 15, context)];
-	}
-
-	module.exports = LevelOne;
-
-/***/ },
-/* 9 */
-/***/ function(module, exports) {
-
-	function Obstacle(x, y, width, height, context) {
-	  this.x = x;
-	  this.y = y;
-	  this.width = width;
-	  this.height = height;
-	  this.context = context;
-	}
-
-	Obstacle.prototype.draw = function () {
-	  var img = new Image();
-	  img.src = 'http://bgfons.com/upload/brick_texture3348.jpg';
-	  this.context.drawImage(img, this.x, this.y, this.width, this.height);
-	};
-
-	module.exports = Obstacle;
-
-/***/ },
-/* 10 */
-/***/ function(module, exports) {
-
-	function Target(x, y, context) {
-	  this.x = x;
-	  this.y = y;
-	  this.width = 17;
-	  this.height = 50;
-	  this.context = context;
-	  this.display = true;
-	}
-
-	Target.prototype.draw = function () {
-	  if (this.display) {
-	    var img = new Image();
-	    img.src = 'http://i.imgur.com/eWbMI9a.png';
-	    this.context.drawImage(img, this.x, this.y, this.width, this.height);
-	  }
-	};
-
-	module.exports = Target;
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Obstacle = __webpack_require__(9);
-	var Target = __webpack_require__(10);
-
-	function LevelTwo(context) {
-	  this.context = context;
-	  this.ammo = 5;
-	  this.targets = createTargets(context);
-	  this.obstacles = createObstacles(context);
-	}
-
-	function createObstacles(context) {
-	  return [new Obstacle(350, 100, 20, 200, context), new Obstacle(550, 200, 200, 15, context), new Obstacle(850, 300, 25, 200, context), new Obstacle(0, 200, 200, 15, context)];
-	}
-
-	function createTargets(context) {
-	  return [new Target(855, 250, context), new Target(0, 150, context), new Target(650, 150, context)];
-	}
-
-	LevelTwo.prototype.draw = function () {
-	  this.obstacles.forEach(function (obstacle) {
-	    obstacle.draw();
-	  });
-	  this.targets.forEach(function (target) {
-	    target.draw();
-	  });
-	};
-
-	module.exports = LevelTwo;
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Obstacle = __webpack_require__(9);
-	var Target = __webpack_require__(10);
-
-	function LevelThree(context) {
-	  var obstacleRightVert = new Obstacle(955, 370, 20, 30, context);
-	  var obstacleRightHighHoriz = new Obstacle(875, 300, 50, 20, context);
-	  var obstacleRightLowHoriz = new Obstacle(875, 400, 100, 20, context);
-	  var obstacleEdgeVert = new Obstacle(850, 300, 25, 200, context);
-	  var obstacleEdgeHoriz = new Obstacle(0, 200, 200, 15, context);
-	  var targetRight = new Target(855, 250, context);
-	  var targetLeft = new Target(0, 150, context);
-	  var targetMid = new Target(900, 350, context);
-	  this.context = context;
-	  this.ammo = 5;
-	  this.targets = [targetRight, targetLeft, targetMid];
-	  this.obstacles = [obstacleRightVert, obstacleRightHighHoriz, obstacleEdgeVert, obstacleEdgeHoriz, obstacleRightLowHoriz];
-	}
-
-	LevelThree.prototype.draw = function () {
-	  this.obstacles.forEach(function (obstacle) {
-	    obstacle.draw();
-	  });
-	  this.targets.forEach(function (target) {
-	    target.draw();
-	  });
-	};
-
-	module.exports = LevelThree;
 
 /***/ }
 /******/ ]);

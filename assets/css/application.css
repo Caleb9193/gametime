@@ -10,7 +10,6 @@ body {
   border-color: white;
   display: none;
   margin: auto;
-  margin-top: 5%;
 }
 
 .well {
@@ -37,8 +36,35 @@ body {
   padding-top: 5px;
 }
 
+#instructions {
+  background-color: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: white;
+  display: block;
+  margin-left: 15%;
+  margin-right: 15%;
+  margin-top: 2px;
+  margin-bottom: 10px;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
 h1 {
   font-size: 300%;
+}
+
+h3 {
+  text-decoration: underline;
+  margin-bottom: 6px;
+}
+
+p {
+  margin-top: 6px;
+}
+
+#hints {
+  margin-top: 15px;
+  margin-bottom: 5px;
 }
 
 button {
