@@ -49,15 +49,11 @@
 	var context = canvas.getContext('2d');
 	var getClickPosition = __webpack_require__(3);
 	var Game = __webpack_require__(4);
-	var Shooter = __webpack_require__(12);
-	var Bullet = __webpack_require__(13);
+	var Shooter = __webpack_require__(13);
+	var Bullet = __webpack_require__(14);
 
 	$(document).ready(function () {
-	  var scores = localStorage.scores.split(',').splice(1).sort().reverse();
-
-	  for (var i = 0; i <= 2; i++) {
-	    $('#scores').append('<li class="score">' + scores[i] + '</li>');
-	  }
+	  checkScores();
 
 	  $('#start-game-btn').on('click', function () {
 	    $('#welcome').hide();
@@ -112,11 +108,23 @@
 	    });
 
 	    $('#restart-game-btn').on('click', function () {
-	      $('#scoreboard').hide();
+	      $('#restart-game').hide();
 	      requestAnimationFrame(startLoop);
 	    });
 	  });
 	});
+
+	function checkScores() {
+	  var scores = localStorage.scores.split(',').splice(1).sort().reverse();
+
+	  if (localStorage.scores !== '') {
+	    for (var i = 0; i <= 2; i++) {
+	      $('#scores').append('<li class="score">' + scores[i] + '</li>');
+	    }
+	  } else {
+	    $('#scores').append('<p>No scores yet</p>');
+	  }
+	}
 
 /***/ },
 /* 1 */
@@ -2142,13 +2150,14 @@
 	var LevelOne = __webpack_require__(7);
 	var LevelTwo = __webpack_require__(10);
 	var LevelThree = __webpack_require__(11);
+	var LevelFour = __webpack_require__(12);
 	if (!localStorage.scores) {
 	  localStorage.scores = '';
 	}
 
 	function Game(context) {
 	  this.currentLevel = new LevelOne(context);
-	  this.finalLevel = 3;
+	  this.finalLevel = 4;
 	  this.scoreboard = new Scoreboard(context);
 	  this.bullets = [];
 	  this.levelWon = false;
@@ -2163,7 +2172,7 @@
 	  } else if (this.currentLevel.number === 2) {
 	    this.currentLevel = new LevelThree(this.context);
 	  } else if (this.currentLevel.number === 3) {
-	    this.gameOver = true;
+	    this.currentLevel = new LevelFour(this.context);
 	  }
 	  this.levelWon = false;
 	};
@@ -2248,7 +2257,7 @@
 	  scoreboard.context.font = "35px Verdana";
 	  scoreboard.context.fillStyle = "white";
 	  scoreboard.context.textAlign = "center";
-	  scoreboard.context.fillText("Score: " + scoreboard.levelScore + " | Total Score: " + scoreboard.gameScore, scoreboard.context.canvas.width / 2, 60);
+	  scoreboard.context.fillText("Score: " + scoreboard.levelScore + " | Total Score: " + scoreboard.gameScore, scoreboard.context.canvas.width / 2, 250);
 
 	  return scoreboard;
 	}
@@ -2452,6 +2461,41 @@
 
 /***/ },
 /* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Obstacle = __webpack_require__(8);
+	var Target = __webpack_require__(9);
+
+	function LevelFour(context) {
+	  this.context = context;
+	  this.number = 4;
+	  this.ammo = 7;
+	  this.remainingAmmo = 7;
+	  this.targets = createTargets(context);
+	  this.obstacles = createObstacles(context);
+	}
+
+	function createObstacles(context) {
+	  return [new Obstacle(910, 300, 200, 25, context), new Obstacle(840, 380, 50, 15, context), new Obstacle(740, 390, 50, 15, context), new Obstacle(640, 400, 50, 15, context), new Obstacle(911, 365, 25, 140, context), new Obstacle(450, 0, 15, 150, context), new Obstacle(350, 135, 200, 20, context), new Obstacle(350, 95, 20, 60, context)];
+	}
+
+	function createTargets(context) {
+	  return [new Target(855, 330, context), new Target(420, 85, context), new Target(480, 85, context), new Target(755, 340, context), new Target(655, 350, context), new Target(1070, 450, context)];
+	}
+
+	LevelFour.prototype.draw = function () {
+	  this.obstacles.forEach(function (obstacle) {
+	    obstacle.draw();
+	  });
+	  this.targets.forEach(function (target) {
+	    target.draw();
+	  });
+	};
+
+	module.exports = LevelFour;
+
+/***/ },
+/* 13 */
 /***/ function(module, exports) {
 
 	function Shooter(context) {
@@ -2467,7 +2511,7 @@
 	module.exports = Shooter;
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports) {
 
 	function Bullet(directionX, directionY, context) {

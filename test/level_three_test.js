@@ -1,6 +1,5 @@
 const chai = require('chai');
 const assert = chai.assert;
-const stub = require('./support/stub');
 const LevelThree = require('../lib/level_three');
 const Target = require('../lib/target');
 const Obstacle = require('../lib/obstacle');
@@ -10,7 +9,7 @@ describe('LevelThree', function(){
     var level = new LevelThree();
 
     it('has a default ammo amount', function(){
-      assert.equal(level.ammo, 5);
+      assert.equal(level.ammo, 6);
     });
 
     it('has a default array of targets', function(){
