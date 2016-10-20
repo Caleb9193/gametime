@@ -98,7 +98,7 @@ describe('Bullet', function(){
     var bullet = new Bullet(directionX, directionY, context);
     var level = new LevelOne(context);
 
-    it('should be a function', function(){
+    it('should be defined', function(){
       assert.isDefined(bullet.collisionCheck(level.obstacles, level.targets));
     });
   });
