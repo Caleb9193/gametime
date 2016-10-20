@@ -53,6 +53,10 @@
 	var Bullet = __webpack_require__(13);
 
 	$(document).ready(function () {
+	  let scores = localStorage.scores.split(',').splice(1).sort().reverse();
+	  for (var i = 0; i <= 2; i++) {
+	    $('#scores').append('<li class="score">' + scores[i] + '</li>');
+	  }
 	  $('#start-game-btn').on('click', function () {
 	    $('#welcome').hide();
 	    $('#instructions').css('display', 'block');
@@ -2136,6 +2140,9 @@
 	var LevelOne = __webpack_require__(7);
 	var LevelTwo = __webpack_require__(10);
 	var LevelThree = __webpack_require__(11);
+	if (!localStorage.scores) {
+	  localStorage.scores = '';
+	}
 
 	function Game(context) {
 	  this.currentLevel = new LevelOne(context);
@@ -2206,6 +2213,7 @@
 	      // if level & game won
 	      this.calculateScores(game.currentLevel.remainingAmmo);
 	      gameWinText(this);
+	      localStorage.scores = localStorage.scores + ',' + this.gameScore.toString();
 	      game.levelWon = true;
 	      break;
 	    case 2:
