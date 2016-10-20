@@ -48,11 +48,13 @@
 	__webpack_require__(3);
 
 	$('.game-canvas').hide();
+	$('#instructions').hide();
 
 	$(document).ready(function () {
 	  $('#start-game-btn').on('click', function () {
 	    $('#welcome').hide();
-	    $('.game-canvas').show();
+	    $('#instructions').show('slow');
+	    $('.game-canvas').show('slow');
 	  });
 	});
 
@@ -2362,7 +2364,7 @@
 
 	function LevelOne(context) {
 	  this.context = context;
-	  this.ammo = 5;
+	  this.ammo = 3;
 	  this.targets = createTargets(context);
 	  this.obstacles = createObstacles(context);
 	}
@@ -2478,7 +2480,7 @@
 	  var targetLeft = new Target(0, 150, context);
 	  var targetMid = new Target(900, 350, context);
 	  this.context = context;
-	  this.ammo = 5;
+	  this.ammo = 6;
 	  this.targets = [targetRight, targetLeft, targetMid];
 	  this.obstacles = [obstacleRightVert, obstacleRightHighHoriz, obstacleEdgeVert, obstacleEdgeHoriz, obstacleRightLowHoriz];
 	}
