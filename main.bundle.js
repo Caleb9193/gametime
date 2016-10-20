@@ -2051,14 +2051,14 @@
 
 	var canvas = document.getElementById('game');
 	var context = canvas.getContext('2d');
+	var $ = __webpack_require__(1);
 
 	var getClickPosition = __webpack_require__(4);
 	var Bullet = __webpack_require__(5);
 	var Shooter = __webpack_require__(6);
 	var shooter = new Shooter(context);
 	var Scoreboard = __webpack_require__(7);
-	var level = 1;
-	var scoreboard = new Scoreboard(context, level);
+	var scoreboard = new Scoreboard(context);
 	var LevelOne = __webpack_require__(8);
 	var LevelTwo = __webpack_require__(11);
 	var LevelThree = __webpack_require__(12);
@@ -2073,6 +2073,11 @@
 	    currentLevel = new LevelTwo(context);
 	  } else if (scoreboard.level === 3) {
 	    currentLevel = new LevelThree(context);
+	  } else {
+	    setTimeout(function () {
+	      $('.game-canvas').hide();
+	      $('#welcome').show();
+	    }, 3000);
 	  }
 	}
 
@@ -2258,10 +2263,11 @@
 /* 7 */
 /***/ function(module, exports) {
 
-	function Scoreboard(context, level) {
+	function Scoreboard(context) {
 	  this.targetsLeft = 0;
 	  this.context = context;
-	  this.level = level;
+	  this.level = 1;
+	  this.totalScore = 0;
 	}
 
 	Scoreboard.prototype.draw = function (currentLevel, bullets) {
@@ -2282,12 +2288,18 @@
 	};
 
 	Scoreboard.prototype.getText = function (currentLevel, bullets) {
-	  if (this.targetsLeft === 0) {
-	    // if game won
+	  if (this.targetsLeft === 0 && this.level < 3) {
+	    // if level won
+	    this.totalScore += 100 + currentLevel.ammo * 100;
 	    gameWinText(currentLevel, this);
 	    this.level += 1;
+	  } else if (this.targetsLeft === 0 && this.level === 3) {
+	    // if full game won
+	    this.totalScore += 100 + currentLevel.ammo * 100;
+	    endGameText(currentLevel, this);
+	    this.level += 1;
 	  } else if (currentLevel.ammo === 0 && bullets.length === 0) {
-	    // if game lost
+	    // if level lost
 	    gameLoseText(currentLevel, this);
 	  } else {
 	    // if game in progress
@@ -2302,6 +2314,15 @@
 	  that.context.fillStyle = "white";
 	  that.context.textAlign = "center";
 	  that.context.fillText("Score: " + (100 + currentLevel.ammo * 100), that.context.canvas.width / 2, 60);
+
+	  return that;
+	}
+
+	function endGameText(currentLevel, that) {
+	  that.context.font = "35px Verdana";
+	  that.context.fillStyle = "white";
+	  that.context.textAlign = "center";
+	  that.context.fillText("You Won! Final Score: " + that.totalScore, that.context.canvas.width / 2, 60);
 
 	  return that;
 	}
