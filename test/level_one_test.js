@@ -10,7 +10,7 @@ describe('LevelOne', function(){
     var level = new LevelOne();
 
     it('has a default ammo amount', function(){
-      assert.equal(level.ammo, 5);
+      assert.equal(level.ammo, 4);
     });
 
     it('has a default array of targets', function(){
